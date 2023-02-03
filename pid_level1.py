@@ -68,18 +68,6 @@ btn = Button(win, text='Reset the ball', width=10,
              height=2, bd='5', command=reset)
 btn.place(x=30, y=100)
 
-# Initial speed of the ball
-yspeed=5
-xspeed=0
-
-# Mass of the ball
-mass = 1 
-gravity = 9.8 # In Earth Gravity
-
-# Current time and timestep
-current_time = 0
-timestep = 1
-
 
 ############# The workshop need to change from here #########################
 
@@ -139,15 +127,61 @@ def updatePID():
 
 btn = Button(win, text='Update PID', width=10,
              height=2, bd='5', command=updatePID)
-btn.place(x=30, y=310)
+btn.place(x=30, y=270)
+
+
+Pointlabel= Label(canvas, text="Height: ")
+Pointlabel.place(x=30, y=340)
+Pointentry= Entry(canvas,width=5) 
+Pointentry.insert(0, ppoint)
+Pointentry.place(x=90, y=340)
+
+def updatePoint():
+    global Kp, Ki, Kd, xdata, ydata, ball, ppoint, equilibrium_line
+    # Range of change 80 to 400
+    ppoint = float(Pointentry.get())
+    if ppoint <= 400 and ppoint >= 80:
+        # Update Data
+        Kp = float(Kpentry.get())
+        Ki = float(Kientry.get())
+        Kd = float(Kdentry.get())
+        
+
+        # Delete the line
+        canvas.delete(equilibrium_line)
+        # Create a new line
+        equilibrium_line = canvas.create_line((190,ppoint,310,ppoint), dash=(5,1))
+
+        print(Kp,Ki,Kd)
+    
+
+btn = Button(win, text='Change Point', width=10,
+             height=2, bd='5', command=updatePoint)
+btn.place(x=30, y=370)
+
+# Initial speed of the ball
+yspeed=5
+xspeed=0
+
+# Mass of the ball
+mass = 1 
+gravity = 9.8 # In Earth Gravity
+
+# Current time and timestep
+current_time = 0
+timestep = 1
 
 # Move the ball
 def move_ball():
     global xspeed, yspeed, current_time, ppoint, timestep, xdata, ydata
+    # Update the current time
     current_time += timestep
+    # Update the speed
     yspeed = yspeed + gravity * timestep 
-    
+    # Canvas will set the ball speed
     canvas.move(ball, xspeed, yspeed)
+
+    # Get the current position of the ball
     (leftpos, toppos, rightpos, bottompos)=canvas.coords(ball)
     yspeed = PID_control(yspeed, int(toppos+bottompos)/2, ppoint)
 
